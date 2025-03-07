@@ -1,6 +1,7 @@
 package tonsub
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/xssnick/tonutils-go/address"
@@ -35,11 +36,12 @@ type NFT struct {
 	CollectionAddress string `json:"collection_address"` // Address of the collection to which the NFT belongs
 	Meta              string `json:"meta"`
 	Message           string `json:"message"` // Optional message extracted from the transaction
+	TxHash            string `json:"tx_hash"`
 }
 
 // NFTBody processes a tlb.InternalMessage and extracts NFT transaction data,
 // returning a filled RootNFT structure or an error if processing fails.
-func (s *Sub) NFTBody(ti *tlb.InternalMessage) (*RootNFT, error) {
+func (s *Sub) NFTBody(ti *tlb.InternalMessage, txHash []byte) (*RootNFT, error) {
 
 	// Parse the source address of the transaction to create an NFT item client.
 	nftAddr := address.MustParseAddr(ti.SrcAddr.String())
@@ -112,6 +114,7 @@ func (s *Sub) NFTBody(ti *tlb.InternalMessage) (*RootNFT, error) {
 			CollectionAddress: nftData.CollectionAddress.String(),
 			Meta:              meta,
 			Message:           text,
+			TxHash:            base64.StdEncoding.EncodeToString(txHash),
 		},
 	}, nil
 }

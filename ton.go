@@ -1,6 +1,7 @@
 package tonsub
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/xssnick/tonutils-go/tlb"
@@ -27,11 +28,12 @@ type RootTON struct {
 // specifically capturing any messages encoded in the payload.
 type Ton struct {
 	Message string `json:"message"` // Optional message extracted from the transaction's payload
+	TxHash  string `json:"tx_hash"`
 }
 
 // TonBody processes a tlb.InternalMessage, extracting its payload
 // and mapping the result to a RootTON struct, returning an error if parsing issues occur.
-func (s *Sub) TonBody(ti *tlb.InternalMessage) (*RootTON, error) {
+func (s *Sub) TonBody(ti *tlb.InternalMessage, txHash []byte) (*RootTON, error) {
 
 	// Begin parsing the payload section of the internal message body
 	payload := ti.Body.BeginParse()
@@ -72,6 +74,7 @@ func (s *Sub) TonBody(ti *tlb.InternalMessage) (*RootTON, error) {
 		CreatedAt:   ti.CreatedAt,        // Copy the creation Unix timestamp
 		Body: Ton{
 			Message: text, // Include the extracted message text in the Body
+			TxHash:  base64.StdEncoding.EncodeToString(txHash),
 		},
 	}, nil
 }

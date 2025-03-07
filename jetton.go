@@ -1,6 +1,7 @@
 package tonsub
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 
@@ -31,11 +32,12 @@ type Jetton struct {
 	Amount  string `json:"amount"`   // Amount of Jetton involved in the transaction
 	Sender  string `json:"sender"`   // Address of the sender
 	Message string `json:"message"`  // Optional message included in the transaction
+	TxHash  string `json:"tx_hash"`
 }
 
 // JettonBody parses a tlb.InternalMessage containing Jetton transaction data
 // into a RootJetton struct. It returns an error if any part of the parsing fails.
-func (s *Sub) JettonBody(ti *tlb.InternalMessage) (*RootJetton, error) {
+func (s *Sub) JettonBody(ti *tlb.InternalMessage, txHash []byte) (*RootJetton, error) {
 	// Check if the internal message is nil and return an error if it is.
 	if ti == nil {
 		return nil, errors.New("input internal message is nil")
@@ -111,6 +113,7 @@ func (s *Sub) JettonBody(ti *tlb.InternalMessage) (*RootJetton, error) {
 			Amount:  amount.String(), // Amount as string
 			Sender:  sender.String(), // Sender as string
 			Message: text,            // Extracted message
+			TxHash:  base64.StdEncoding.EncodeToString(txHash),
 		},
 	}, nil
 }

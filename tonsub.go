@@ -138,7 +138,7 @@ func (s *Sub) subscribe(channel chan *tlb.Transaction) {
 				case 0x05138d91: // NFT transfer opcode
 
 					if s.clbNFT != nil {
-						body, err := s.NFTBody(ti)
+						body, err := s.NFTBody(ti, tx.Hash)
 						if err != nil {
 							continue // Skip on error
 						}
@@ -149,7 +149,7 @@ func (s *Sub) subscribe(channel chan *tlb.Transaction) {
 				case 0x7362d09c: // Jetton transfer opcode
 
 					if s.clbJetton != nil {
-						body, err := s.JettonBody(ti)
+						body, err := s.JettonBody(ti, tx.Hash)
 						if err != nil {
 							continue // Skip on error
 						}
@@ -159,7 +159,7 @@ func (s *Sub) subscribe(channel chan *tlb.Transaction) {
 				case 0x00000000: // TON transfer opcode
 
 					if s.clbTon != nil {
-						body, err := s.TonBody(ti)
+						body, err := s.TonBody(ti, tx.Hash)
 						if err != nil {
 							continue // Skip on error
 						}
