@@ -85,13 +85,10 @@ func New(addr string, network string) (*Sub, error) {
 
 	// Initialize core Sub instance with default callback functions and set state.
 	core = &Sub{
-		Context:   ctx,
-		Block:     block,
-		Api:       api,
-		lt:        acc.LastTxLT,
-		clbJetton: func(t *RootJetton) {},
-		clbTon:    func(t *RootTON) {},
-		clbNFT:    func(t *RootNFT) {},
+		Context: ctx,
+		Block:   block,
+		Api:     api,
+		lt:      acc.LastTxLT,
 	}
 
 	// Create a channel to receive new transactions.
@@ -139,25 +136,35 @@ func (s *Sub) subscribe(channel chan *tlb.Transaction) {
 				// Call the appropriate callback based on the operation code
 				switch opCode {
 				case 0x05138d91: // NFT transfer opcode
-					body, err := s.NFTBody(ti)
-					if err != nil {
-						continue // Skip on error
+
+					if s.clbNFT != nil {
+						body, err := s.NFTBody(ti)
+						if err != nil {
+							continue // Skip on error
+						}
+
+						s.clbNFT(body)
 					}
-					s.clbNFT(body)
 
 				case 0x7362d09c: // Jetton transfer opcode
-					body, err := s.JettonBody(ti)
-					if err != nil {
-						continue // Skip on error
+
+					if s.clbJetton != nil {
+						body, err := s.JettonBody(ti)
+						if err != nil {
+							continue // Skip on error
+						}
+						s.clbJetton(body)
 					}
-					s.clbJetton(body)
 
 				case 0x00000000: // TON transfer opcode
-					body, err := s.TonBody(ti)
-					if err != nil {
-						continue // Skip on error
+
+					if s.clbTon != nil {
+						body, err := s.TonBody(ti)
+						if err != nil {
+							continue // Skip on error
+						}
+						s.clbTon(body)
 					}
-					s.clbTon(body)
 				}
 			}
 		}
