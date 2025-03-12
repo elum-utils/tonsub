@@ -169,6 +169,9 @@ type NFT struct {
 
 If this project aids your development and you would like to support its growth, please consider making a donation:
 
-**TON Wallet:** ```UQActNkydex6WaHNO55qMHkzNjLKsKN_oF_dKMpZ3K7lAAAA```
+**TON Wallet:** 
+```
+UQActNkydex6WaHNO55qMHkzNjLKsKN_oF_dKMpZ3K7lAAAA
+```
 
 Your contributions help in enhancing and progressing the project. Thank you for your support!
