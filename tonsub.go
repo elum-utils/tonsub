@@ -12,6 +12,10 @@ import (
 
 var core *Sub // Global instance of Sub structure
 
+type CallbackJetton func(t *RootJetton)
+type CallbackTON func(t *RootTON)
+type CallbackNFT func(t *RootNFT)
+
 // Sub represents a subscription manager for different transaction types within the TON blockchain network.
 type Sub struct {
 	Context context.Context      // Context used for binding requests to a single TON node
@@ -19,28 +23,28 @@ type Sub struct {
 	Api     ton.APIClientWrapped // Wrapped API client for interacting with the TON blockchain
 	lt      uint64               // Last transaction logical time (LT)
 
-	clbJetton func(t *RootJetton) // Callback function for Jetton transactions
-	clbTon    func(t *RootTON)    // Callback function for TON transactions
-	clbNFT    func(t *RootNFT)    // Callback function for NFT transactions
+	clbJetton CallbackJetton // Callback function for Jetton transactions
+	clbTon    CallbackTON    // Callback function for TON transactions
+	clbNFT    CallbackNFT    // Callback function for NFT transactions
 }
 
 // OnJetton registers a callback function for Jetton transactions.
-func (s *Sub) OnJetton(clb func(t *RootJetton)) {
+func (s *Sub) OnJetton(clb CallbackJetton) {
 	s.clbJetton = clb
 }
 
 // OnTON registers a callback function for TON transactions.
-func (s *Sub) OnTON(clb func(t *RootTON)) {
+func (s *Sub) OnTON(clb CallbackTON) {
 	s.clbTon = clb
 }
 
 // OnNFT registers a callback function for NFT transactions.
-func (s *Sub) OnNFT(clb func(t *RootNFT)) {
+func (s *Sub) OnNFT(clb CallbackNFT) {
 	s.clbNFT = clb
 }
 
 // New initializes a new Sub instance with the provided address and network configuration.
-func New(addr string, network string) (*Sub, error) {
+func New(addr string, network string, lt ...uint64) (*Sub, error) {
 	client := liteclient.NewConnectionPool()
 
 	// Create a sticky context to bind all requests to a single TON node.
@@ -83,12 +87,17 @@ func New(addr string, network string) (*Sub, error) {
 		return nil, err
 	}
 
+	lastTxLT := acc.LastTxLT
+	if len(lt) > 0 && lt[0] > 0 {
+		lastTxLT = lt[0]
+	}
+
 	// Initialize core Sub instance with default callback functions and set state.
 	core = &Sub{
 		Context: ctx,
 		Block:   block,
 		Api:     api,
-		lt:      acc.LastTxLT,
+		lt:      lastTxLT,
 	}
 
 	// Create a channel to receive new transactions.
@@ -103,7 +112,7 @@ func New(addr string, network string) (*Sub, error) {
 	return core, nil
 }
 
-// subscribe listens to the transaction channel and processes transactions based on their type.
+// Subscribe listens to the transaction channel and processes transactions based on their type.
 func (s *Sub) subscribe(channel chan *tlb.Transaction) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -138,33 +147,39 @@ func (s *Sub) subscribe(channel chan *tlb.Transaction) {
 				case 0x05138d91: // NFT transfer opcode
 
 					if s.clbNFT != nil {
+
 						body, err := s.NFTBody(ti, tx.Hash)
 						if err != nil {
 							continue // Skip on error
 						}
-
 						s.clbNFT(body)
+
 					}
 
 				case 0x7362d09c: // Jetton transfer opcode
 
 					if s.clbJetton != nil {
+
 						body, err := s.JettonBody(ti, tx.Hash)
 						if err != nil {
 							continue // Skip on error
 						}
 						s.clbJetton(body)
+
 					}
 
 				case 0x00000000: // TON transfer opcode
 
 					if s.clbTon != nil {
+
 						body, err := s.TonBody(ti, tx.Hash)
 						if err != nil {
 							continue // Skip on error
 						}
 						s.clbTon(body)
+
 					}
+
 				}
 			}
 		}

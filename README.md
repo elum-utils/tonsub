@@ -16,7 +16,7 @@ Initialize the subscription by connecting to the TON network:
 
 ```go
 subs, err := tonsub.New(
-    "your_masterchain",
+    "wallet_address",
     "https://ton.org/global.config.json",
 )
 
