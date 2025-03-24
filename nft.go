@@ -15,6 +15,7 @@ type RootNFT struct {
 	IHRDisabled bool   `json:"ihr_disabled"` // Flag indicating if Instant Hypercube Routing is disabled
 	Bounce      bool   `json:"bounce"`       // Flag for bounce status of the transaction
 	Bounced     bool   `json:"bounced"`      // Flag indicating if the transaction has already bounced
+	SndrAddr    string `json:"snr_addr"`     // Sender address of the transaction as a string
 	SrcAddr     string `json:"src_addr"`     // Source address of the transaction as a string
 	DstAddr     string `json:"dst_addr"`     // Destination address of the transaction as a string
 	Amount      string `json:"amount"`       // Amount involved in the transaction represented as a string
@@ -95,16 +96,17 @@ func (s *Sub) NFTBody(ti *tlb.InternalMessage, txHash []byte) (*RootNFT, error) 
 
 	// Return composed RootNFT structure with all processed transaction data.
 	return &RootNFT{
-		IHRDisabled: ti.IHRDisabled,      // Indicates if IHR is disabled
-		Bounce:      ti.Bounce,           // Bounce status
-		Bounced:     ti.Bounced,          // Bounced status
-		SrcAddr:     ti.SrcAddr.String(), // Source address as string
-		DstAddr:     ti.DstAddr.String(), // Destination address as string
-		Amount:      ti.Amount.String(),  // Amount as string
-		IHRFee:      ti.IHRFee.String(),  // IHR fee as string
-		FwdFee:      ti.FwdFee.String(),  // Forwarding fee as string
-		CreatedLT:   ti.CreatedLT,        // Created logical time
-		CreatedAt:   ti.CreatedAt,        // Unix creation timestamp
+		IHRDisabled: ti.IHRDisabled,           // Indicates if IHR is disabled
+		Bounce:      ti.Bounce,                // Bounce status
+		Bounced:     ti.Bounced,               // Bounced status
+		SndrAddr:    ti.SenderAddr().String(), // Sender address as string
+		SrcAddr:     ti.SrcAddr.String(),      // Source address as string
+		DstAddr:     ti.DstAddr.String(),      // Destination address as string
+		Amount:      ti.Amount.String(),       // Amount as string
+		IHRFee:      ti.IHRFee.String(),       // IHR fee as string
+		FwdFee:      ti.FwdFee.String(),       // Forwarding fee as string
+		CreatedLT:   ti.CreatedLT,             // Created logical time
+		CreatedAt:   ti.CreatedAt,             // Unix creation timestamp
 		Body: NFT{
 			OpCode:            0x7362d09c, // Operation code
 			Initialized:       nftData.Initialized,

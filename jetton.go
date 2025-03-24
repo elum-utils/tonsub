@@ -14,6 +14,7 @@ type RootJetton struct {
 	IHRDisabled bool   `json:"ihr_disabled"` // Indicator if Instant Hypercube Routing is disabled
 	Bounce      bool   `json:"bounce"`       // Indicator if the message should bounce back if it fails
 	Bounced     bool   `json:"bounced"`      // Indicator if the message has already bounced
+	SndrAddr    string `json:"snr_addr"`     // Sender address of the transaction as a string
 	SrcAddr     string `json:"src_addr"`     // Source address as a string
 	DstAddr     string `json:"dst_addr"`     // Destination address as a string
 	Amount      string `json:"amount"`       // Amount involved in the transaction as a string
@@ -97,16 +98,17 @@ func (s *Sub) JettonBody(ti *tlb.InternalMessage, txHash []byte) (*RootJetton, e
 
 	// Return a populated RootJetton struct containing all parsed data
 	return &RootJetton{
-		IHRDisabled: ti.IHRDisabled,      // Indicates if IHR is disabled
-		Bounce:      ti.Bounce,           // Bounce status
-		Bounced:     ti.Bounced,          // Bounced status
-		SrcAddr:     ti.SrcAddr.String(), // Source address as string
-		DstAddr:     ti.DstAddr.String(), // Destination address as string
-		Amount:      ti.Amount.String(),  // Amount as string
-		IHRFee:      ti.IHRFee.String(),  // IHR fee as string
-		FwdFee:      ti.FwdFee.String(),  // Forwarding fee as string
-		CreatedLT:   ti.CreatedLT,        // Created logical time
-		CreatedAt:   ti.CreatedAt,        // Unix creation timestamp
+		IHRDisabled: ti.IHRDisabled,           // Indicates if IHR is disabled
+		Bounce:      ti.Bounce,                // Bounce status
+		Bounced:     ti.Bounced,               // Bounced status
+		SndrAddr:    ti.SenderAddr().String(), // Sender address as string
+		SrcAddr:     ti.SrcAddr.String(),      // Source address as string
+		DstAddr:     ti.DstAddr.String(),      // Destination address as string
+		Amount:      ti.Amount.String(),       // Amount as string
+		IHRFee:      ti.IHRFee.String(),       // IHR fee as string
+		FwdFee:      ti.FwdFee.String(),       // Forwarding fee as string
+		CreatedLT:   ti.CreatedLT,             // Created logical time
+		CreatedAt:   ti.CreatedAt,             // Unix creation timestamp
 		Body: Jetton{
 			OpCode:  opCode,          // Operation code
 			QueryID: queryID,         // Query ID

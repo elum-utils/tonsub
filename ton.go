@@ -14,6 +14,7 @@ type RootTON struct {
 	IHRDisabled bool   `json:"ihr_disabled"` // Flag indicating if Instant Hypercube Routing is disabled
 	Bounce      bool   `json:"bounce"`       // Flag indicating if bounces are enabled for this transaction
 	Bounced     bool   `json:"bounced"`      // Flag indicating if this message has already bounced
+	SndrAddr    string `json:"snr_addr"`     // Sender address of the transaction as a string
 	SrcAddr     string `json:"src_addr"`     // Source address of the transaction, represented as a string
 	DstAddr     string `json:"dst_addr"`     // Destination address of the transaction, represented as a string
 	Amount      string `json:"amount"`       // Amount involved in the transaction, formatted as a string
@@ -61,17 +62,18 @@ func (s *Sub) TonBody(ti *tlb.InternalMessage, txHash []byte) (*RootTON, error) 
 
 	// Construct and return a new RootTON struct populated with extracted data
 	return &RootTON{
-		OpCode:      0x00000000,          // Default OpCode value
-		IHRDisabled: ti.IHRDisabled,      // Copy the IHRDisabled status from internal message
-		Bounce:      ti.Bounce,           // Copy the Bounce flag status
-		Bounced:     ti.Bounced,          // Copy the Bounced status
-		SrcAddr:     ti.SrcAddr.String(), // Convert source address to string
-		DstAddr:     ti.DstAddr.String(), // Convert destination address to string
-		Amount:      ti.Amount.String(),  // Convert transaction amount to string
-		IHRFee:      ti.IHRFee.String(),  // Convert IHR fee to string
-		FwdFee:      ti.FwdFee.String(),  // Convert forwarding fee to string
-		CreatedLT:   ti.CreatedLT,        // Copy the logical creation time
-		CreatedAt:   ti.CreatedAt,        // Copy the creation Unix timestamp
+		OpCode:      0x00000000,               // Default OpCode value
+		IHRDisabled: ti.IHRDisabled,           // Copy the IHRDisabled status from internal message
+		Bounce:      ti.Bounce,                // Copy the Bounce flag status
+		Bounced:     ti.Bounced,               // Copy the Bounced status
+		SndrAddr:    ti.SenderAddr().String(), // Sender address as string
+		SrcAddr:     ti.SrcAddr.String(),      // Convert source address to string
+		DstAddr:     ti.DstAddr.String(),      // Convert destination address to string
+		Amount:      ti.Amount.String(),       // Convert transaction amount to string
+		IHRFee:      ti.IHRFee.String(),       // Convert IHR fee to string
+		FwdFee:      ti.FwdFee.String(),       // Convert forwarding fee to string
+		CreatedLT:   ti.CreatedLT,             // Copy the logical creation time
+		CreatedAt:   ti.CreatedAt,             // Copy the creation Unix timestamp
 		Body: Ton{
 			Message: text, // Include the extracted message text in the Body
 			TxHash:  base64.StdEncoding.EncodeToString(txHash),
